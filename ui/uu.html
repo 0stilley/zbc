@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体育训练计划</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --accent: #ffd166;
+            --dark: #1a535c;
+            --light: #f7fff7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .student-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 220px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .info-card h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .info-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: var(--accent);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            font-size: 1.1rem;
+        }
+        
+        .tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            background: #ffc44d;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .session-title {
+            color: var(--dark);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .session-goal {
+            background: #e8f7f6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .training-block {
+            margin-bottom: 25px;
+        }
+        
+        .block-title {
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .block-title::before {
+            content: "•";
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        
+        .exercise-list {
+            padding-left: 25px;
+        }
+        
+        .exercise-item {
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 2px solid var(--accent);
+        }
+        
+        .exercise-name {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .exercise-detail {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .special-note {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px dashed var(--accent);
+        }
+        
+        .special-note h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .download-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .download-btn {
+            background: linear-gradient(to right, var(--primary), #ff8e8e);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        .footer-note {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .adjustment-badge {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        @media (max-width: 768px) {
+            .student-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .info-card {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>体育训练计划</h1>
+            <p>10节课专项训练方案（每节90分钟）</p>
+            
+            <div class="student-info">
+                <div class="info-card">
+                    <h3>年龄</h3>
+                    <p>12岁</p>
+                </div>
+                <div class="info-card">
+                    <h3>身高</h3>
+                    <p>160cm/153cm</p>
+                </div>
+                <div class="info-card">
+                    <h3>体重</h3>
+                    <p>42.45kg/33.20kg</p>
+                </div>
+                <div class="info-card">
+                    <h3>跳远成绩</h3>
+                    <p>160cm/187cm</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" data-target="session1">第1-3节课</button>
+            <button class="tab" data-target="session2">第4-6节课</button>
+            <button class="tab" data-target="session3">第7-9节课</button>
+            <button class="tab" data-target="session4">第10节课</button>
+            <button class="tab" data-target="notes">注意事项</button>
+        </div>
+        
+        <div class="content-section active" id="session1">
+            <h2 class="session-title">第1-3节课：基础训练阶段</h2>
+            <div class="session-goal">
+                <strong>训练目标：</strong> 建立腹部发力模式，规范摆臂姿势，提升髋部灵活性
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">第1节课：核心激活+基础跳跃</h3>
+                <div class="block-content">
+                    <p><strong>动态热身（15min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳绳热身：</span>
+                            <span class="exercise-detail">1分钟×2组（黄敏贤使用节奏跳绳）</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">关节环绕：</span>
+                            <span class="exercise-detail">肩、髋、踝各30秒</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">毛毛虫爬行：</span>
+                            <span class="exercise-detail">5次（全身激活）</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>核心强化（25min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">仰卧抛球：</span>
+                            <span class="exercise-detail">3kg药球，3组×10次</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">仰卧交替抬腿：</span>
+                            <span class="exercise-detail">3组×20秒（控制离地高度15cm）</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>下肢灵敏（20min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">栏架变向跳：</span>
+                            <span class="exercise-detail">低栏架20cm，4组×8次</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>柔韧与恢复（15min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">坐姿体前屈：</span>
+                            <span class="exercise-detail">动态拉伸（利用19cm优势手触脚尖弹动）</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">泡沫轴放松：</span>
+                            <span class="exercise-detail">大腿前侧</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">第2节课：跑姿基础+髋膝联动</h3>
+                <div class="block-content">
+                    <p><strong>动态热身（15min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">高抬腿跑+后踢腿跑：</span>
+                            <span class="exercise-detail">各15m×3组</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">弓步转体：</span>
+                            <span class="exercise-detail">10次/侧（动态拉伸髋部）</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>跑步技术（30min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">原地摆臂：</span>
+                            <span class="exercise-detail">肘关节90°，3组×30秒</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">原地定臂：</span>
+                            <span class="exercise-detail">3组×15秒</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">阻力带原地提膝：</span>
+                            <span class="exercise-detail">弹力带膝上，3组×10次/腿</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>下肢控制（20min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">单腿跨栏架：</span>
+                            <span class="exercise-detail">栏架30cm，3组×6次/腿</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>恢复（10min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">婴儿式拉伸：</span>
+                            <span class="exercise-detail">背部放松</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">仰卧抱膝：</span>
+                            <span class="exercise-detail">腰部放松</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">第3节课：动态协调+核心稳定</h3>
+                <div class="block-content">
+                    <p><strong>动态热身（15min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">十字交叉步：</span>
+                            <span class="exercise-detail">左右移动，2组×10m</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">开合跳：</span>
+                            <span class="exercise-detail">1分钟</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>跑姿整合（25min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">车轮跑分解：</span>
+                            <span class="exercise-detail">垫步+高抬腿→完整车轮跑，4组×10m</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">十字交叉步加速：</span>
+                            <span class="exercise-detail">标志碟Z字跑，3组×15m</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>核心进阶（20min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">俯卧开胯：</span>
+                            <span class="exercise-detail">蛙式伸展，3组×12次</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">平板支撑：</span>
+                            <span class="exercise-detail">3组×20秒</span>
+                        </li>
+                    </ul>
+                    
+                    <p><strong>柔韧训练（15min）</strong></p>
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">蝴蝶式压胯：</span>
+                            <span class="exercise-detail">家长辅助轻压膝盖，3组×15秒</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">泡沫轴放松：</span>
+                            <span class="exercise-detail">臀部</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section" id="session2">
+            <h2 class="session-title">第4-6节课：力量强化阶段</h2>
+            <div class="session-goal">
+                <strong>训练目标：</strong> 提升动作质量，增强核心与下肢力量，初步融入跑步专项
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">动态热身（15min）</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">双人同步高抬腿：</span>
+                            <span class="exercise-detail">与赵伊一配对，互相观察节奏</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">蜘蛛侠爬行：</span>
+                            <span class="exercise-detail">全身激活</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">核心强化（20min）</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">仰卧死虫式：</span>
+                            <span class="exercise-detail">4组×10次（腿下落至离地5cm）</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">侧支撑抬臀：</span>
+                            <span class="exercise-detail">每侧3组×15秒</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">跑步专项+力量（40min）</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">摆臂进阶：</span>
+                            <span class="exercise-detail">持500ml水瓶摆臂+闭眼平衡，3组×20秒</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">送髋强化：</span>
+                            <span class="exercise-detail">弹力带螃蟹步+深蹲停顿，2组×8次</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">下肢爆发力：</span>
+                            <span class="exercise-detail">台阶跳（20cm），4组×8次</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">下肢力量：</span>
+                            <span class="exercise-detail">交替箭步蹲替代单腿跳，3组×6次/腿</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">柔韧与恢复（15min）</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">瑜伽流动：</span>
+                            <span class="exercise-detail">下犬式→战士三式（利用19cm体前屈优势）</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="special-note">
+                <h4>个性化调整说明</h4>
+                <p>黄敏贤的训练计划重点在增强下肢离心控制，简化复合动作，利用其柔韧性优势。与赵伊一相比：</p>
+                <ul>
+                    <li>跳跃高度从30cm降低到20cm，强调落地稳定性</li>
+                    <li>摆臂训练增加闭眼平衡练习，提升控制能力</li>
+                    <li>跳绳采用节奏训练而非速度训练，减少断绳</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content-section" id="session3">
+            <h2 class="session-title">第7-9节课：专项整合阶段</h2>
+            <div class="session-goal">
+                <strong>训练目标：</strong> 提升跑步经济性，强化全身协同发力
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">跑步技术</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">20m加速跑：</span>
+                            <span class="exercise-detail">改为斜坡跑（5°坡度），3组</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">车轮跑分解：</span>
+                            <span class="exercise-detail">垫步+低抬腿，4组×12m</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">力量进阶</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">熊爬：</span>
+                            <span class="exercise-detail">加宽手脚间距，3组×6m</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">靠墙静蹲+踮脚：</span>
+                            <span class="exercise-detail">替代单腿硬拉，3组×20秒</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">俯卧撑交替摸肩：</span>
+                            <span class="exercise-detail">改为跪姿，3组×8次</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">能量消耗</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳绳训练：</span>
+                            <span class="exercise-detail">变速训练（快跳15秒+慢跳30秒）×3组</span>
+                            <span class="adjustment-badge">调整</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="special-note">
+                <h4>训练重点说明</h4>
+                <p>本阶段降低速度要求，强化动作连贯性：</p>
+                <ul>
+                    <li>斜坡跑有助于强化后蹬同时节省体力</li>
+                    <li>加宽熊爬间距提升躯干稳定性</li>
+                    <li>跪姿俯卧撑保护肩关节发展上肢力量</li>
+                    <li>变速跳绳提高心肺功能同时保持趣味性</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content-section" id="session4">
+            <h2 class="session-title">第10节课：综合测试与反馈</h2>
+            <div class="session-goal">
+                <strong>训练目标：</strong> 评估训练成果，提供后续家庭训练计划
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">动态评估</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">立定跳远测试：</span>
+                            <span class="exercise-detail">初始160cm/187cm → 目标165cm+/190+</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">协调性测试：</span>
+                            <span class="exercise-detail">30秒交替单脚跳绳（目标单侧40+次）</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">技术展示</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">20m加速跑：</span>
+                            <span class="exercise-detail">家长观摩动作改进情况</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">摆臂姿势对比：</span>
+                            <span class="exercise-detail">展示训练前后视频记录</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">家庭训练计划</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">每日练习：</span>
+                            <span class="exercise-detail">靠墙静蹲3组×20秒 + 节奏跳绳200个</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">每周训练：</span>
+                            <span class="exercise-detail">核心循环训练（平板支撑、臀桥、死虫式）</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="special-note">
+                <h4>营养与后续发展建议</h4>
+                <ul>
+                    <li><strong>饮食调整：</strong> 增加钙摄入（酸奶/豆腐），适量增加蛋白质（鸡蛋+鱼虾）</li>
+                    <li><strong>体重管理：</strong> BMI 16.6接近标准，侧重蛋白质质量而非热量</li>
+                    <li><strong>发展方向：</strong> 利用柔韧性优势发展艺术体操或跨栏项目</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content-section" id="notes">
+            <h2 class="session-title">训练注意事项</h2>
+            
+            <div class="training-block">
+                <h3 class="block-title">安全与监控</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳跃落地：</span>
+                            <span class="exercise-detail">所有跳跃动作要求"无声"落地（缓冲控制）</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">阻力带使用：</span>
+                            <span class="exercise-detail">避免弹回撞击，检查固定点安全性</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">关节保护：</span>
+                            <span class="exercise-detail">特别关注膝关节在蹲跳动作中的稳定性</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">训练分组策略</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳跃训练：</span>
+                            <span class="exercise-detail">黄敏贤20cm高度强调控制，赵伊一30cm追求爆发</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">摆臂训练：</span>
+                            <span class="exercise-detail">黄敏贤闭眼平衡+控制，赵伊一负重强化后摆</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳绳训练：</span>
+                            <span class="exercise-detail">黄敏贤节奏训练（减少断绳），赵伊一速度训练</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="training-block">
+                <h3 class="block-title">趣味与合作训练</h3>
+                <div class="block-content">
+                    <ul class="exercise-list">
+                        <li class="exercise-item">
+                            <span class="exercise-name">双人阻力带对抗跑：</span>
+                            <span class="exercise-detail">黄敏贤在前，赵伊一在后提供阻力</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">跳绳接力挑战：</span>
+                            <span class="exercise-detail">两人合计目标300个/分钟</span>
+                        </li>
+                        <li class="exercise-item">
+                            <span class="exercise-name">标志碟追逐赛：</span>
+                            <span class="exercise-detail">设置不同颜色标志碟进行反应训练</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="special-note">
+                <h4>家长沟通要点</h4>
+                <ul>
+                    <li>黄敏贤需优先建立动作控制自信，避免与赵伊一直接比较爆发力数据</li>
+                    <li>课后30分钟内补充蛋白质（鸡蛋1个/牛奶200ml）</li>
+                    <li>避免训练日外额外长跑，防止消耗过量</li>
+                    <li>每周测量晨起静息心率，监控恢复情况</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="download-section">
+            <button class="download-btn" id="downloadBtn">
+                <span>下载完整训练计划</span>
+            </button>
+        </div>
+        
+        <div class="footer-note">
+            <p>注：本训练计划由专业体育教练制定，结合黄敏贤身体素质特点个性化调整</p>
+            <p>训练时间：每节课90分钟 | 执行日期：2025年7月-8月</p>
+        </div>
+    </div>
+    
+    <script>
+        // 标签切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有活动标签和内容
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(c => c.classList.remove('active'));
+                
+                // 激活当前标签和内容
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+        
+        // 下载功能
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            // 创建训练计划文本
+            const planContent = `
+                体育训练计划（10节课）
+                
+                学员信息：
+                年龄：12岁 | 身高：160cm/153cm | 体重：42.45kg
+                跳远：160cm/187cm | 坐位体前屈：19cm/12.5cm | 跳绳：135个/170个
+                
+                === 第1-3节课：基础训练阶段 ===
+                第1节课：核心激活+基础跳跃
+                第2节课：跑姿基础+髋膝联动
+                第3节课：动态协调+核心稳定
+                
+                === 第4-6节课：力量强化阶段 ===
+                动态热身（15min）
+                核心强化（20min）
+                跑步专项+力量（40min）
+                柔韧与恢复（15min）
+                
+                === 第7-9节课：专项整合阶段 ===
+                跑步技术
+                力量进阶
+                能量消耗
+                
+                === 第10节课：综合测试与反馈 ===
+                动态评估
+                技术展示
+                家庭训练计划
+                
+                注意事项：
+                1. 所有跳跃动作要求"无声"落地
+                2. 黄敏贤与赵伊一采用差异化训练方案
+                3. 课后30分钟内补充蛋白质
+                
+                制定：体育教练
+                日期：${new Date().toLocaleDateString()}
+            `;
+            
+            // 创建Blob对象
+            const blob = new Blob([planContent], {type: 'application/msword'});
+            
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '黄敏贤体育训练计划.doc';
+            
+            // 触发下载
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // 提示用户
+            alert('训练计划已开始下载！文件名为：黄敏贤体育训练计划.doc');
+        });
+    </script>
+</body>
+</html>
